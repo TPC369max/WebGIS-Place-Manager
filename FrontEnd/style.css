@@ -1,0 +1,565 @@
+/* --- 通用样式 --- */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: sans-serif;
+    line-height: 1.6;
+    overflow: hidden; /* 防止根元素产生不必要的滚动条 */
+}
+
+*, *::before, *::after {
+    box-sizing: border-box; /* 推荐全局设置 */
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* --- 导航栏样式 --- */
+#navbar {
+    background-color: #333;
+    color: #fff;
+    padding: 10px 0;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+    /* height: 60px; */ /* JS会动态获取 */
+}
+
+#navbar .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#navbar h1 {
+    margin: 0;
+    font-size: 1.5em; /* 调整标题大小 */
+}
+
+#navbar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+}
+
+#navbar ul li {
+    margin-left: 20px;
+}
+
+#navbar ul li a {
+    color: #fff;
+    text-decoration: none;
+    padding: 5px 0;
+}
+#navbar ul li a:hover, #navbar ul li a.active-nav-link { /* 添加激活导航链接样式 */
+    border-bottom: 2px solid #007bff;
+    color: #00bfff;
+}
+
+
+/* --- 主体内容样式 --- */
+#content {
+    /* margin-top 由 JS 设置 */
+    /* height 由 JS 设置 (calc(100vh - navbarHeight)) */
+    display: flex;
+    flex-direction: column; /* 默认垂直排列子元素 */
+    overflow: hidden; /* 防止 #content 自身滚动，让子元素处理滚动 */
+}
+
+/* --- 地图默认样式 (当它是唯一内容时) --- */
+#map {
+    width: 100%;
+    flex-grow: 1; /* 当作为 #content 的唯一可见子元素时，填满剩余空间 */
+    background-color: #e0e0e0; /* 给地图一个背景色，以便在加载时看到 */
+}
+
+/* --- "关于" Section 样式 --- */
+#about-section {
+    padding: 25px 30px;
+    overflow-y: auto; /* 如果内容多，允许垂直滚动 */
+    flex-grow: 1; /* 占满 #content 的空间 */
+    background-color: #fff;
+}
+.about-container {
+    max-width: 900px;
+    margin: 0 auto;
+}
+.about-container h2, .about-container h3 {
+    color: #333;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 5px;
+    margin-top: 25px;
+}
+.about-container p {
+    line-height: 1.7;
+    color: #555;
+}
+.about-container ul {
+    padding-left: 20px;
+}
+.about-container ul li {
+    margin-bottom: 8px;
+}
+
+/* --- "地名数据表" Section 样式 --- */
+#data-table-section {
+    display: flex;
+    flex-direction: column; /* 内部元素垂直排列 */
+    flex-grow: 1; /* 占满 #content 的空间 */
+    overflow-y: auto; /* 关键：允许整个 data-table-section 垂直滚动 */
+    padding: 15px 20px; /* 为整个 section 添加内边距 */
+    background-color: #f4f6f8; /* 轻微的背景色 */
+}
+
+.data-table-controls-area { /* 包裹顶部搜索和操作按钮的容器 */
+    background-color: #fff;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    margin-bottom: 15px;
+    flex-shrink: 0; /* 防止这个区域被压缩 */
+}
+
+#table-search-controls {
+    display: flex;
+    flex-wrap: wrap; /* 允许换行 */
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 15px; /* 与下面的按钮组间距 */
+}
+
+#table-search-controls select,
+#table-search-controls input[type="text"] {
+    padding: 8px 10px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 0.95em;
+}
+#table-search-controls input[type="text"] {
+    flex-grow: 1; /* 让搜索框占据更多空间 */
+    min-width: 200px; /* 最小宽度 */
+}
+
+/* 统一表格操作按钮样式 */
+.table-action-btn {
+    padding: 8px 15px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    font-size: 0.9em;
+    cursor: pointer;
+    transition: background-color 0.2s ease, opacity 0.2s ease;
+    white-space: nowrap;
+}
+.table-action-btn.primary {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+.table-action-btn.primary:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
+}
+.table-action-btn.secondary {
+    background-color: #6c757d;
+    color: white;
+    border-color: #6c757d;
+}
+.table-action-btn.secondary:hover {
+    background-color: #545b62;
+    border-color: #545b62;
+}
+.table-action-btn.danger {
+    background-color: #dc3545;
+    color: white;
+    border-color: #dc3545;
+}
+.table-action-btn.danger:hover {
+    background-color: #b02a37;
+    border-color: #b02a37;
+}
+/* 默认按钮样式 (如修改选中) */
+#table-search-controls button, 
+#table-controls button:not(.primary):not(.secondary):not(.danger) {
+    background-color: #e9ecef;
+    border-color: #ced4da;
+    color: #343a40;
+}
+#table-search-controls button:hover,
+#table-controls button:not(.primary):not(.secondary):not(.danger):hover {
+    background-color: #d3d9df;
+    border-color: #b6bfc8;
+}
+
+
+#table-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    /* margin-bottom: 15px; */ /* 已被 .data-table-controls-area 的 margin-bottom 覆盖 */
+}
+
+
+#place-form-container {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    margin-bottom: 20px; /* 与表格的间距 */
+    flex-shrink: 0; /* 防止表单容器被压缩 */
+}
+#place-form-container h3 {
+    margin-top: 0;
+    margin-bottom: 18px;
+    color: #333;
+    text-align: center;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+#place-form .form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* 响应式列布局 */
+    gap: 15px 20px; /* 行间距和列间距 */
+    margin-bottom: 20px;
+}
+
+#place-form .form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+#place-form label {
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #495057;
+    font-size: 0.9em;
+}
+
+#place-form input[type="text"],
+#place-form input[type="number"] {
+    padding: 10px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 1em;
+    width: 100%; /* 占满 .form-group */
+}
+#place-form input:focus {
+    border-color: #80bdff;
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+}
+
+#place-form small {
+    font-size: 0.8em;
+    color: #6c757d;
+    margin-top: 4px;
+}
+
+#place-form .form-actions {
+    display: flex;
+    justify-content: flex-end; /* 按钮右对齐 */
+    gap: 10px;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+}
+.form-error-message {
+    color: #dc3545;
+    margin-top: 10px;
+    font-size: 0.9em;
+    text-align: center;
+}
+
+
+#data-table-container { 
+    overflow-x: auto; /* 如果表格很宽，允许水平滚动 */
+    overflow-y: visible; /* 表格容器不再需要垂直滚动，由父级 #data-table-section 处理 */
+    flex-grow: 1; /* 尝试让表格容器填充剩余空间，但如果内容多，父级会滚动 */
+    border: 1px solid #dee2e6;
+    border-radius: 6px; /* 给表格容器圆角 */
+    background-color: #fff;
+    min-height: 200px; /* 给表格一个最小高度，避免在数据少时过扁 */
+}
+#place-data-table {
+    width: 100%; 
+    margin: 0;
+    border-collapse: collapse; /* 移除默认的表格边框间距 */
+}
+#place-data-table th,#place-data-table td{
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+#place-data-table th{
+    background-color: #f2f2f2;
+}
+#place-data-table tr:nth-child(even){background-color: #f9f9f9;}
+#place-data-table tr:hover{background-color: #ddd;}
+
+
+#pagination-controls {
+    margin: 20px 0 10px 0; /* 调整上下边距 */
+    text-align: center;
+    flex-shrink: 0;
+}
+
+/* --- 路径规划区域特定样式 --- */
+#path-planning-section {
+    background-color: #f0f3f5;
+    width: 100%;
+    display: flex; 
+    flex-direction: column; 
+    flex-shrink: 0; 
+    position: relative; 
+    z-index: 5;
+    border-bottom: 1px solid #d0d7de; 
+}
+
+.path-planning-container { 
+    max-width: 1200px;
+    width:100%;
+    margin: 0 auto;
+    padding: 10px 15px; 
+    box-sizing: border-box;
+}
+
+.path-planning-header {
+    text-align: center;
+    border-bottom: 1px solid #dce1e5;
+    padding-bottom: 8px; 
+    margin-bottom: 12px; 
+}
+.path-planning-header h2 {
+    margin-top: 5px; 
+    margin-bottom: 3px;
+    font-size: 1.3em; 
+}
+.path-planning-subtitle {
+    font-size: 0.85em; 
+}
+
+.path-controls-panel {
+    background-color: #ffffff;
+    padding: 12px; 
+    border-radius: 6px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+    display: flex;
+    flex-direction: column; /* 外部依然是列向，用于 instructions 和下面的行 */
+    gap: 10px; 
+    /* overflow-y: auto; */ /* 如果内容不多，可以移除，或只在必要时显示 */
+    /* max-height: 50vh; */ /* 暂时移除或调小，看实际效果 */
+}
+
+.instructions {
+    font-size: 0.9em;
+    padding: 8px 10px; 
+    margin-bottom: 8px; 
+    background-color: #e9f5ff;
+    border-left: 4px solid #007bff;
+    border-radius: 4px;
+    flex-shrink: 0; /* 防止提示信息被压缩 */
+}
+
+/* 新增一个 div 来包裹 point-selector-group 和 action-buttons，使其在同一行 */
+.controls-main-row {
+    display: flex;
+    flex-direction: row; /* 水平排列 */
+    justify-content: space-between; /* 两端对齐，或根据需要用 space-around, center */
+    align-items: flex-start; /* 顶端对齐，或者 center */
+    gap: 15px; /* 它们之间的间隙 */
+    flex-wrap: wrap; /* 如果屏幕太窄，允许换行 */
+}
+
+.point-selector-group {
+    display: flex;
+    flex-direction: column; /* 内部的两个 point-selector 依然是垂直排列 */
+    gap: 8px; /* 两个 point-selector 之间的间隙 */
+    flex-grow: 1; /* 允许它占据更多可用空间 */
+    min-width: 300px; /* 给一个最小宽度，防止被过度压缩 */
+}
+
+.point-selector {
+    display: flex;
+    align-items: center; 
+    gap: 8px;
+    padding: 6px 8px; 
+    border: 1px solid #ddd;
+    border-radius: 4px; /* 统一圆角 */
+    background-color: #fdfdfd; /* 轻微背景色 */
+}
+.point-selector label {
+    font-weight: 600; /* 加粗标签 */
+    color: #333;
+    min-width: 40px; /* 调整标签最小宽度 */
+    font-size: 0.9em; /* 调整字体大小 */
+    margin-right: 5px;
+}
+.coords-display {
+    font-family: monospace; 
+    background-color: #f0f0f0;
+    padding: 5px 8px; /* 统一 padding */
+    border-radius: 3px;
+    color: #333;
+    flex-grow: 1; /* 允许坐标显示区域扩展 */
+    text-align: left; /* 左对齐坐标 */
+    font-size: 0.85em;
+    min-width: 120px;
+    overflow: hidden; /* 防止文本溢出 */
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.path-btn { 
+    padding: 6px 10px; /* 调整按钮 padding */
+    font-size: 0.85em; /* 调整按钮字体大小 */
+    border: 1px solid #ccc;
+    background-color: #f7f7f7;
+    color: #333;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    white-space: nowrap; /* 防止按钮文字换行 */
+}
+.path-btn:hover {
+    background-color: #e9e9e9;
+}
+.path-btn.active-path-btn { 
+    background-color: #28a745; /* 激活时用 Bootstrap success 绿色 */
+    color: white;
+    border-color: #1e7e34;
+}
+.path-btn.active-path-btn:hover{
+    background-color: #218838;
+}
+
+.action-buttons {
+    display: flex;
+    flex-direction: column; /* 操作按钮改为垂直排列，以适应行布局 */
+    gap: 8px; 
+    align-items: stretch; /* 让按钮宽度一致 (如果需要) */
+    /* margin-top: 0; */ /* 因为已经在同一行，不需要顶部外边距了 */
+    /* flex-shrink: 0; */ /* 允许按钮组根据内容收缩 */
+    min-width: 120px; /* 给按钮组一个最小宽度 */
+}
+.action-btn { 
+    padding: 8px 12px; /* 调整按钮 padding */
+    font-size: 0.9em; /* 调整按钮字体大小 */
+    /* width: 100%; */ /* 如果希望按钮宽度填充其容器（在column布局下） */
+}
+
+.path-feedback {
+    margin-top: 10px; /* 调整间距 */
+    padding: 8px 10px; 
+    font-size: 0.9em;
+    text-align: center; /* 反馈信息居中 */
+    flex-shrink: 0; /* 防止被压缩 */
+}
+
+.path-feedback.success-feedback { background-color: #d1e7dd; color: #0f5132; border-color: #badbcc;}
+.path-feedback.error-feedback { background-color: #f8d7da; color: #842029; border-color: #f5c2c7;}
+.path-feedback.info-feedback { background-color: #cff4fc; color: #055160; border-color: #b6effb;}
+
+
+/* --- 隐藏与显示 --- */
+.hidden {
+    display: none !important; /* 确保总是隐藏 */
+}
+
+/* 响应式调整 (可以保持或根据新布局调整) */
+@media (max-width: 768px) {
+    #navbar .container {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    #navbar ul {
+        margin-top: 10px;
+        flex-direction: column;
+        width: 100%; /* 导航项宽度占满 */
+    }
+    #navbar ul li {
+        margin-left: 0;
+        margin-bottom: 5px;
+        width: 100%;
+    }
+     #navbar ul li a {
+        display: block; /* 使链接块状显示，方便点击 */
+        padding: 8px 10px;
+        text-align: center;
+    }
+
+    .point-selector-group {
+        flex-direction: column;
+    }
+    .point-selector {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .coords-display {
+        margin: 8px 0;
+        text-align: left;
+    }
+    .action-buttons {
+        flex-direction: column;
+    }
+    .action-btn {
+        width: 100%;
+    }
+    #path-planning-section, #data-table-section, #about-section {
+        padding: 10px; /* 小屏幕上减少padding */
+    }
+    .path-planning-container, .about-container {
+        padding: 10px;
+    }
+    .path-planning-container, .about-container {
+        padding: 10px 12px; /* 调整 padding */
+    }
+    .path-controls-panel {
+        max-height: 60vh; /* 小屏幕上允许控制面板更高一些 */
+    }
+    .controls-main-row {
+        flex-direction: column; /* 在小屏幕上，控制行改回垂直排列 */
+        align-items: stretch; /* 拉伸子元素以填充宽度 */
+    }
+    .point-selector-group {
+        min-width: auto; /* 移除最小宽度限制 */
+        width: 100%; /* 占满宽度 */
+    }
+    .action-buttons {
+        flex-direction: row; /* 小屏幕上，如果希望动作按钮水平排列 */
+        justify-content: space-around; /* 或其他对齐方式 */
+        width: 100%; /* 占满宽度 */
+    }
+    .action-buttons .action-btn {
+        flex-grow: 1; /* 让按钮平分空间 */
+        margin: 0 5px; /* 添加一些间距 */
+    }
+    /* 如果希望动作按钮在小屏幕上也垂直排列，则保持 .action-buttons 的 flex-direction: column; */
+    #data-table-section {
+        padding: 10px; /* 小屏幕上减少 section padding */
+    }
+    .data-table-controls-area {
+        padding: 10px;
+    }
+    #table-search-controls, #table-controls {
+        flex-direction: column; /* 控件在小屏幕上垂直堆叠 */
+        align-items: stretch; /* 拉伸控件以填充宽度 */
+    }
+    #table-search-controls input[type="text"],
+    #table-search-controls select,
+    #table-search-controls button,
+    #table-controls button {
+        width: 100%; /* 控件宽度占满 */
+        margin-bottom: 8px; /* 添加垂直间距 */
+    }
+    #place-form .form-grid {
+        grid-template-columns: 1fr; /* 表单项单列显示 */
+    }
+    /* ... (路径规划的响应式调整保持) ... */
+}

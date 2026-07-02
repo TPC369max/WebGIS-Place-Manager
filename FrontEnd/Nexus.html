@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Leaflet Map - 地名管理与路径规划</title> <!-- 修改标题 -->
+  <link rel="stylesheet" type="text/css" href="./leaflet/leaflet.css">
+  <link rel="stylesheet" type="text/css" href="./leaflet/Control.FullScreen.css">
+  <link rel="stylesheet" type="text/css" href="./leaflet/MarkerCluster/MarkerCluster.Default.css">
+  <link rel="stylesheet" href="style.css">
+  <!-- 移除了空的 link 和 script 标签 -->
+  <script type="text/javascript" src="./leaflet/leaflet.js"></script>
+  <script type="text/javascript" src="./leaflet/Control.FullScreen.js"></script>
+  <script src="./leaflet/MarkerCluster/leaflet.markercluster.js"></script>
+  <script type="text/javascript" src="./leaflet/leaflet-bing-layer.js"></script>
+</head>
+<body>
+    <nav id="navbar">
+        <div class="container">
+            <h1>地名管理与路径规划系统</h1> <!-- 修改系统名称 -->
+            <div>
+            当前缩放级别: <span id="current-zoom"></span></div>
+            <ul>
+                <li><a href="#" id="home-link">首页 (地图)</a></li> <!-- 明确首页内容 -->
+                <li><a href="#" id="path-planning-link">路径规划</a></li> <!-- 路径规划提前，如果常用 -->
+                <li><a href="#" id="data-table-link">地名数据表</a></li>
+                <li><a href="#" id="about-link">关于</a></li> <!-- 修改链接文字 -->
+            </ul>
+        </div>
+    </nav>
+
+    <main id="content">
+        <!-- "关于" Section -->
+        <div id="about-section" class="hidden">
+            <div class="about-container"> <!-- 添加一个容器方便样式控制 -->
+                <h2>关于本系统</h2>
+                <p>欢迎使用地名管理与路径规划系统！</p>
+                <p>本系统是一个基于 Web GIS 技术的综合应用，旨在提供便捷的地名数据管理、地理空间信息可视化以及智能路径规划服务。主要功能包括：</p>
+                <ul>
+                    <li><strong>地名数据管理：</strong> 支持地名数据的查看、添加、修改和删除。您可以方便地维护和更新地理位置点的相关信息，如名称、级别和精确坐标。</li>
+                    <li><strong>交互式地图展示：</strong> 利用 Leaflet.js 开源库，系统在多种底图（如 Esri 街景、卫星影像，高德地图）上清晰展示江苏省的行政区划面数据和大量的地名点数据。地名点采用聚合方式显示，优化了大规模数据加载时的性能和可读性。</li>
+                    <li><strong>路径规划功能：</strong> 基于 Dijkstra 算法和 OpenStreetMap (OSM) 提供的南通市路网数据，实现了两点之间的最短路径计算与可视化。用户可以在地图上直观选择起点和终点，系统将计算并绘制出推荐路径。</li>
+                    <li><strong>技术栈：</strong>
+                        <ul>
+                            <li>前端：HTML, CSS, JavaScript, Leaflet.js</li>
+                            <li>后端：Python (Flask框架)</li>
+                            <li>数据库：PostgreSQL + PostGIS (用于存储和查询空间数据)</li>
+                            <li>路径算法：Dijkstra (基于 NetworkX 和 OSMnx 库处理路网)</li>
+                        </ul>
+                    </li>
+                </ul>
+                <p>系统致力于提供一个直观、高效的地理信息操作平台。如果您在使用过程中有任何问题或建议，请随时与我们联系。</p>
+                <h3>联系方式</h3>
+                <p>如有任何疑问，请发送邮件至: <a href="mailto:dns@tpcmax369.cloudns.org">dns@tpcmax369.cloudns.org</a></p>
+            </div>
+        </div>
+
+        <!-- "地名数据表" Section -->
+        <div id="data-table-section" class="hidden">
+            <div class="data-table-controls-area"> <!-- 新增一个包裹层用于控制顶部控件 -->
+                <div id="table-search-controls">
+                  <select id="search-field-select">
+                    <option value="name">按名称</option>
+                    <option value="Oid">按Oid</option>
+                  </select>
+                  <input type="text" id="search-input" placeholder="输入搜索词...">
+                  <button id="search-btn" class="table-action-btn">搜索</button>
+                  <button id="clear-search-btn" class="table-action-btn secondary">清空</button>
+                </div>
+                <div id="table-controls"> <!-- 移除了内联 style -->
+                  <button id="add-place-btn" class="table-action-btn primary">添加地名</button>
+                  <button id="edit-selected-btn" class="table-action-btn">修改选中</button>
+                  <button id="delete-selected-btn" class="table-action-btn danger">删除选中</button>
+                </div>
+            </div>
+
+            <div id="place-form-container" class="hidden"> <!-- 表单容器样式将调整 -->
+              <h3 id="form-title">添加新地名</h3>
+              <form id="place-form">
+                <input type="hidden" id="editing-oid">
+                <div class="form-grid"> <!-- 使用 grid 布局表单项 -->
+                    <div class="form-group">
+                      <label for="form-place-oid">Oid (唯一标识):</label>
+                      <input type="text" id="form-place-oid" required>
+                      <small>必须是唯一的数字或字符串。</small>
+                    </div>
+                    <div class="form-group">
+                      <label for="form-place-name">名称:</label>
+                      <input type="text" id="form-place-name" required>
+                    </div>
+                    <div class="form-group">
+                      <label for="form-place-level">级别 (PlaceLv):</label>
+                      <input type="text" id="form-place-level" required>
+                    </div>
+                    <div class="form-group">
+                      <label for="form-place-lon">经度 (Longitude):</label>
+                      <input type="number" step="any" id="form-place-lon" required>
+                      <small>例如: 118.7674</small>
+                    </div>
+                    <div class="form-group">
+                      <label for="form-place-lat">纬度 (Latitude):</label>
+                      <input type="number" step="any" id="form-place-lat" required>
+                      <small>例如: 32.0415</small>
+                    </div>
+                </div>
+                <div class="form-actions">
+                  <button type="submit" id="form-submit-btn" class="table-action-btn primary">确认</button> <!-- 统一按钮样式 -->
+                  <button type="button" id="form-cancel-btn" class="table-action-btn secondary">取消</button>
+                </div>
+              </form>
+              <div id="place-form-error" class="form-error-message"></div> <!-- 样式化错误消息 -->
+            </div>
+
+            <div id="data-table-container"> <!-- 表格容器，使其可独立滚动或作为整体滚动的一部分 -->
+                <table id="place-data-table">
+                  <thead>
+                    <tr>
+                      <th>选择</th>
+                      <th>Oid</th>
+                      <th>名称</th>
+                      <th>级别</th>
+                      <th>坐标 (点击跳转)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <!-- 表格内容由JS生成 -->
+                  </tbody>
+                </table>
+            </div>
+            <div id="pagination-controls">
+              <!-- 分页控件由JS生成 -->
+            </div>
+        </div>
+
+        <!-- "路径规划" Section -->
+        <div id="path-planning-section" class="hidden">
+            <div class="path-planning-container">
+                <header class="path-planning-header">
+                    <p class="path-planning-subtitle">使用 Dijkstra 算法 (基于南通市路网数据示例)</p>
+                </header>
+                <div class="path-controls-panel">
+                    <p class="instructions">
+                        操作提示：点击下方 "选择起点" 或 "选择终点" 按钮后，在主地图上点击选择位置。
+                    </p>
+                    <!-- 新增的包裹层 -->
+                    <div class="controls-main-row">
+                        <div class="point-selector-group">
+                            <div class="point-selector">
+                                <label for="set-start-btn"><strong>起点:</strong></label>
+                                <span id="start-point-coords" class="coords-display">未选择</span>
+                                <button id="set-start-btn" class="path-btn">选择起点</button>
+                            </div>
+                            <div class="point-selector">
+                                <label for="set-end-btn"><strong>终点:</strong></label>
+                                <span id="end-point-coords" class="coords-display">未选择</span>
+                                <button id="set-end-btn" class="path-btn">选择终点</button>
+                            </div>
+                        </div>
+                        <div class="action-buttons">
+                            <button id="calculate-path-btn" class="action-btn primary-action" disabled>计算路径</button>
+                            <button id="clear-path-btn" class="action-btn secondary-action">清除选择</button>
+                        </div>
+                    </div> <!-- end of controls-main-row -->
+                    <div id="path-result-message" class="path-feedback"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 主地图 Div，现在是 #content 的直接子元素 -->
+        <div id="map"></div>
+    </main>
+
+    <!-- Leaflet -> L_map (地图初始化) -> path_planning (地图交互函数) -> script (主逻辑) -->
+    <script src="L_map.js"></script>
+    <script src="path_planning.js"></script> 
+    <script src="script.js"></script>
+</body>
+</html>
